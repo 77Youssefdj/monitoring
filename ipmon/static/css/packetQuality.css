@@ -1,0 +1,14 @@
+/* packetQuality.css */
+
+.box {
+    margin-top: 20px;
+}
+
+.title {
+    color: #3273dc;
+}
+
+.table th, .table td {
+    text-align: left;
+    padding: 10px;
+}

@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="column is-8 is-offset-2">
+    <div class="box">
+        <p class="title">Current Polling Confugration</p>
+        <table class="table is-striped">
+            <tr>
+                <th>Polling Interval</th>
+                <th>Poll History Retention Days</th>
+            </tr>
+            <tr>
+                <td>{{ polling_config['poll_interval'] }}</td>
+                <td>{{ polling_config['history_truncate_days'] }}</td>
+            </tr>
+        </table>
+    </div>
+    <div class="box">
+        <p class="title">Update Polling Confugration</p>
+        <form method="POST" action="{{ url_for('main.configure_polling') }}" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="field">
+                <div class="control">
+                    {{ form.interval.label(class_="label") }}
+                    {{ form.interval(class_="input is-large", id="polling-interval") }}
+                    <p class="help">The amount of time in seconds between polling hosts</p>
+                </div>
+                
+            </div>
+            <div class="field">
+                <div class="control">
+                    {{ form.retention_days.label(class_="label") }}
+                    {{ form.retention_days(class_="input is-large", id="history-retention") }}
+                    <p class="help">The number of days to keep poll history logs for each host</p>
+                </div>
+
+            </div>
+            <div class="control">
+                {{ form.submit(class_="button is-info is-medium") }}
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Update placeholders to current polling config values
+    $(document).ready(function () {
+        $("#polling-interval").attr("placeholder", "{{ polling_config['poll_interval'] }}")
+        $("#history-retention").attr("placeholder", "{{ polling_config['history_truncate_days'] }}")
+    })
+</script>
+
+{% endblock %}

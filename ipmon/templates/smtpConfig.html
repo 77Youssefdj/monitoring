@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<!-- Update SMTP Form -->
+<div class="column is-8 is-offset-2">
+    <div class="box">
+        <p class="title">Current SMTP Confugration</p>
+        {% if smtp['smtp_server'] %}
+        <table class="table is-striped">
+            <tr>
+                <th>SMTP Server</th>
+                <td>{{ smtp['smtp_server'] }}</td>
+            </tr>
+            <tr>
+                <th>SMTP Port</th>
+                <td>{{ smtp['smtp_port'] }}</td>
+            <tr>
+                <th>SMTP Sender Address</th>
+                <td>{{ smtp['smtp_sender'] }}</td>
+            </tr>
+        </table>
+        {% else %}
+        <p>SMTP not configured</p>
+        {% endif %}
+        <form method="POST" action="{{ url_for('smtp.configure_smtp') }}" novalidate></form>
+    </div>
+
+    <div class="box">
+        <p class="title">Update SMTP Configuration</p>
+        <form method="POST" action="{{ url_for('smtp.configure_smtp') }}" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="field">
+                <div class="control">
+                    {{ form.server.label(class_="label") }}
+                    {{ form.server(class_="input is-large", id="smtp-server") }}
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    {{ form.port.label(class_="label") }}
+                    {{ form.port(class_="input is-large", id="smtp-port") }}
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    {{ form.sender.label(class_="label") }}
+                    {{ form.sender(class_="input is-large", id="smtp-sender") }}
+                </div>
+            </div>
+
+            <div class="control">
+                {{ form.submit(class_="button is-info is-medium") }}
+            </div>
+        </form>
+    </div>
+
+    <div class="box">
+            <p class="title">SMTP Test</p>
+            <form method="POST" action="{{ url_for('smtp.smtp_test') }}" onsubmit="showLoader();">
+                <div class="field">
+                    <label class="label">Recipient Email Address</label>
+                    <div class="control">
+                        <input class="input is-medium" type="email" name="recipient" required>
+                    </div>
+                </div>
+                <div class="control">
+                    {% if smtp['smtp_server'] and smtp['smtp_port'] and smtp['smtp_sender'] %}
+                    <button class="button is-block is-info is-medium">Send</button>
+                    {% else %}
+                    <button class="button is-block is-info is-medium" disabled>Send</button>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+</div>
+
+<!-- Test SMTP -->
+<div class="column is-6 is-offset-3">
+    
+</div>
+
+{% if smtp['smtp_server'] %}
+<script>
+    // Update placeholders to current SMTP config values
+    $(document).ready(function () {
+        $("#smtp-server").attr("placeholder", "{{ smtp['smtp_server'] }}")
+        $("#smtp-port").attr("placeholder", "{{ smtp['smtp_port'] }}")
+        $("#smtp-sender").attr("placeholder", "{{ smtp['smtp_sender'] }}")
+    })
+</script>
+{% endif %}
+
+{% endblock %}

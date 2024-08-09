@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="column is-8 is-offset-2">
+    <div class="box">
+        <p class="title">Set Theme</p>
+        <form method="POST" action="/setTheme">
+            <div class="field">
+                <div class="select">
+                    <select name="id">
+                        {% for theme in themes %}
+                        {% if theme['active'] == true %}
+                        <option value="{{ theme['id'] }}">{{ theme['theme_name'] }}</option>
+                        {% endif %}
+                        {% endfor %}
+                        {% for theme in themes %}
+                        {% if theme['active'] == false %}
+                        <option value="{{ theme['id'] }}">{{ theme['theme_name'] }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <button class="button is-info is-medium is-centered">Update</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

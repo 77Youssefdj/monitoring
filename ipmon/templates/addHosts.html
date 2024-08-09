@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<!-- Add Single Host -->
+<div class="column is-8 is-offset-2">
+    <div class="box">
+        <p class="title">Add Hosts</p>
+        <form method="POST" action="{{ url_for('hosts.add_hosts') }}" onsubmit="showLoader();" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="field">
+                <div class="control">
+                    {{ form.ip_address.label(class_="label") }}
+                    {{ form.ip_address(class_="textarea is-medium", rows="10") }}
+                    <p class="help">One IP address per line</p>
+                </div>
+            </div>
+            <div class="control">
+                {{ form.submit(class_="button is-info is-medium") }}
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

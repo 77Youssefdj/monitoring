@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Packet Quality</h1>
+        <p class="subtitle">Analyze the quality of your network packets.</p>
+
+        <div class="box">
+            <h2 class="title is-4">Packet Quality Overview</h2>
+            <table class="table is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Packet Loss</td>
+                        <td>{{ packet_loss }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Latency</td>
+                        <td>{{ latency }} ms</td>
+                    </tr>
+                    <tr>
+                        <td>Jitter</td>
+                        <td>{{ jitter }} ms</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

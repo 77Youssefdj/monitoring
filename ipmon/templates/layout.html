@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    {% set theme = get_active_theme_path() %}
+    <link rel="stylesheet" type="text/css" href="{{ theme }}" />
+    <link rel="stylesheet" type="text/css" href="/static/css/datatables.css" />
+    <script type="text/javascript" src="/static/javascript/jquery.js"></script>
+    <script type="text/javascript" src="/static/javascript/datatables.js"></script>
+    <script type="text/javascript" defer src="/static/fontawesome/js/all.js"></script>
+
+    <title>Monitoring</title>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    
+            // Get all "navbar-burger" elements
+            const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+    
+            // Check if there are any navbar burgers
+            if ($navbarBurgers.length > 0) {
+    
+                // Add a click event on each of them
+                $navbarBurgers.forEach(el => {
+                    el.addEventListener('click', () => {
+    
+                        // Get the target from the "data-target" attribute
+                        const target = el.dataset.target;
+                        const $target = document.getElementById(target);
+    
+                        // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+                        el.classList.toggle('is-active');
+                        $target.classList.toggle('is-active');
+    
+                    });
+                });
+            }
+        });
+
+        // Show Loader
+        function showLoader() {
+            $("#main").addClass('is-hidden')
+            $("#loader").removeClass('is-hidden')
+        }
+    
+        // Modal Controls
+        function modalClear() {
+            $("#modal-title").empty()
+            $("#modal-body").empty()
+            $("#modal-footer").empty()
+        }
+    
+        function modalShow() {
+            $("#modal-container").addClass('is-active');
+        }
+    
+        function modalAddContent(title, body, footer) {
+            $("#modal-title").append(title);
+            $("#modal-body").append(body);
+            $("#modal-footer").append(footer);
+        }
+    
+        function modalClose() {
+            $("#modal-container").removeClass('is-active');
+            modalClear();
+        }
+    
+        // Display Notifications
+        function displayNotifications() {
+            $("#notifications").css({"display": "unset"})
+            window.setTimeout(function(){
+                $("#notifications").fadeOut(2000); 
+            }, 3000);
+            
+        }
+
+        function closeNotifications() {
+            $("#notifications").css({"display": "none"})
+        }
+
+        // Get Alerts
+        function getAlerts() {
+            
+        }
+
+        // Display Alerts
+        async function displayAlerts() {
+            var title='Host Alerts'
+            var body='<table id="alerts-table" class="table is-striped"></table>'
+            await modalClear();
+            await modalAddContent(title, body);
+
+            await $.ajax({
+                url: '{{ url_for("api.get_all_host_alerts") }}',
+                type: 'GET',
+                success: function (response) {
+                    var json_data = JSON.parse(response)
+                    var json = {
+                        "columns": [
+                            { "data": "hostname", "title": "Hostname" },
+                            { "data": "ip_address", "title": "IP Address" },
+                            { "data": "poll_time", "title": "Poll Time" },
+                            { "data": "host_status", "title": "Host Status" }
+                        ],
+                        "data": json_data
+                    }
+
+                    if ($.fn.DataTable.isDataTable('#alerts-table')) {
+                        $('#alerts-table').DataTable().destroy();
+                    }
+
+                    var table = $('#alerts-table').DataTable({
+                        "order": [[2, "desc"]],
+                        data: json.data,
+                        columns: json.columns
+                    });
+                }
+            });
+            await modalShow();
+        }
+
+    </script>
+
+</head>
+
+<body>
+    <!-- Notifications -->
+    <section class="hero-body notifications" id="notifications">
+        <div class="container has-text-centered">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="container">
+                    <button class="button is-pulled-right" style="cursor: pointer;" onclick="closeNotifications();">
+                        <span class="icon is-medium">
+                            <i class="fa fa-window-close"></i>
+                        </span>
+                    </button>
+                </div>
+                
+                <script>displayNotifications();</script>
+                {% for category, message in messages %}
+                <div class="notification is-{{category}}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+        </div>
+    </section>
+
+    <!-- Header -->
+    <section class="hero is-primary is-medium">
+        <div class="hero-head">
+            <nav class="navbar">
+                <div class="container">
+                    <div class="navbar-brand">
+                        <a href="{{ url_for('main.index') }}" class="navbar-item is-size-3 has-text-white">
+                            <i class="fas fa-network-wired"></i>&nbsp;Monitoring
+                        </a>
+                        <span class="navbar-burger burger" data-target="navbarMenuHeroA">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </span>
+                    </div>
+                    {% if database_configured() %}
+                    <div id="navbarMenuHeroA" class="navbar-menu">
+                        <div class="navbar-start">
+                            {% if current_user.is_authenticated %}
+                            <div class="navbar-item has-dropdown is-hoverable">
+                                <a class="navbar-link">
+                                    Hosts
+                                </a>
+                                <div class="navbar-dropdown">
+                                    <a href="{{ url_for('hosts.add_hosts') }}" class="navbar-item">
+                                        Add Hosts
+                                    </a>
+                                    <a href="{{ url_for('hosts.update_hosts') }}" class="navbar-item">
+                                        Update Hosts
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="navbar-item has-dropdown is-hoverable">
+                                <a class="navbar-link">
+                                    Configure
+                                </a>
+                                <div class="navbar-dropdown">
+                                    <a href="{{ url_for('main.configure_polling') }}" class="navbar-item">
+                                        Polling
+                                    </a>
+                                    <a href="{{ url_for('smtp.configure_smtp') }}" class="navbar-item">
+                                        SMTP
+                                    </a>
+                                    <a  href="{{ url_for('main.set_theme') }}" class="navbar-item">
+                                        Theme
+                                    </a>
+                                </div>
+                            </div>
+                            <a href="{{ url_for('main.packet_quality') }}" class="navbar-item">
+                                Paquet Quality
+                            </a>
+                            
+                            {% endif %}
+                        </div>
+
+                        <div class="navbar-end">
+                            <a class="navbar-item" onClick="displayAlerts();">
+                                <i class="fas fa-exclamation-triangle"></i>&nbsp;&nbsp;Alerts
+                            </a>
+                            {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('main.account') }}" class="navbar-item">
+                                <i class="fas fa-user"></i>&nbsp;&nbsp;{{current_user.id}}
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('auth.login') }}" class="navbar-item">
+                                <i class="fas fa-user"></i>&nbsp;&nbsp;Log in
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+        </div>
+        </div>
+        </nav>
+        </div>
+    </section>
+
+    <section class="hero">
+        <div class="hero-body">
+            <div class="container">
+                <div class="columns">
+                    <!-- Loader, displayed if main_content is doing something -->
+                    <div class="column is-hidden" id="loader">
+                        <section class="hero-body">
+                            <div class="container">
+                                <progress class="progress is-large is-info" max="100"></progress>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="column" id="main">
+                        <!-- Notifications -->
+                        {% block content %}
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    
+
+</body>
+
+</html>
